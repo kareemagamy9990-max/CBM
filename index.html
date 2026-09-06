@@ -370,6 +370,31 @@
 </div>
 
 <script>
+// شيم تخزين محلي: لو الصفحة مش شغالة جوه Claude Artifact (يعني window.storage الحقيقي مش موجود)،
+// بنستخدم localStorage بتاع المتصفح عشان البيانات تفضل محفوظة كل ما تفتح الملف تاني من نفس الجهاز/المتصفح.
+if(!window.storage){
+  window.storage = {
+    async get(key){
+      const raw = localStorage.getItem(key);
+      if(raw === null) return null;
+      return { key, value: raw, shared: false };
+    },
+    async set(key, value){
+      localStorage.setItem(key, value);
+      return { key, value, shared: false };
+    },
+    async delete(key){
+      const existed = localStorage.getItem(key) !== null;
+      localStorage.removeItem(key);
+      return { key, deleted: existed, shared: false };
+    },
+    async list(prefix){
+      const keys = Object.keys(localStorage).filter(k => !prefix || k.startsWith(prefix));
+      return { keys, prefix, shared: false };
+    }
+  };
+}
+
 const CONTAINERS = {
   '20': { L: 589, W: 235, H: 239, label: '20 قدم', cbm: 589*235*239/1000000 },
   '40': { L: 1203, W: 235, H: 239, label: '40 قدم', cbm: 1203*235*239/1000000 }
