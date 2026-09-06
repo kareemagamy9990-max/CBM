@@ -566,6 +566,17 @@ async function loadItems(){
     const parsed = res ? JSON.parse(res.value) : null;
     if(parsed && parsed.candy){
       itemsByCategory = parsed;
+      // ادمج أي أصناف جديدة في القائمة الافتراضية مش موجودة عند المستخدم أصلاً (بالاسم)
+      const existingNames = new Set(itemsByCategory.candy.map(it => it.name));
+      let added = false;
+      SEED_CANDY.forEach(seedItem => {
+        if(!existingNames.has(seedItem.name)){
+          itemsByCategory.candy.push({ ...seedItem });
+          added = true;
+        }
+      });
+      if(!itemsByCategory.snacks) itemsByCategory.snacks = SEED_SNACKS;
+      if(added) await saveItems();
     } else {
       itemsByCategory = { candy: SEED_CANDY, snacks: SEED_SNACKS };
       await saveItems();
